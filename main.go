@@ -38,61 +38,73 @@ type viacep struct {
 const urlBrasilapi = "https://brasilapi.com.br/api/cep/v1/{{cep}}"
 const urlViacep = "http://viacep.com.br/ws/{{cep}}/json/"
 
-func getCepFromViaCep(ctx context.Context, cep string) (*viacep, error) {
-	urlFinal := strings.Replace(urlViacep, "{{cep}}", cep, -1)
+// getCep performs a GET request on the given url, replacing {{cep}} with the cep argument.
+// It returns the response body as a JSON string, or an error if one occurs.
+// The context is used to cancel the request if it takes longer than 1 second.
+func getCep(ctx context.Context, url string, cep string) (string, error) {
+	urlFinal := strings.Replace(url, "{{cep}}", cep, -1)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", urlFinal, nil)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	select {
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		return "", ctx.Err()
 	default:
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
-			return nil, err
+			return "", err
 		}
 		body, error := io.ReadAll(res.Body)
 		if error != nil {
-			return nil, error
+			return "", error
 		}
-		var v viacep
-		error = json.Unmarshal(body, &v)
-		if error != nil {
-			return nil, error
+		if strings.Contains(url, "viacep") {
+			var v viacep
+			error = json.Unmarshal(body, &v)
+			if error != nil {
+				return "", error
+			}
+			jsonString, err := json.Marshal(v)
+			if err != nil {
+				return "", err
+			}
+			return string(jsonString), nil
+		} else if strings.Contains(url, "brasilapi") {
+			var v brasilapi
+			error = json.Unmarshal(body, &v)
+			if error != nil {
+				return "", error
+			}
+			jsonString, err := json.Marshal(v)
+			if err != nil {
+				return "", err
+			}
+			return string(jsonString), nil
+		} else {
+			return "", err
 		}
-		return &v, nil
+
 	}
+
 }
 
-func getCepFromBrasilapi(ctx context.Context, cep string) (*brasilapi, error) {
-	urlFinal := strings.Replace(urlBrasilapi, "{{cep}}", cep, -1)
-
-	req, err := http.NewRequestWithContext(ctx, "GET", urlFinal, nil)
-	if err != nil {
-		return nil, err
-	}
-
+// getCepSub runs getCep in a separate goroutine and sends the result to the given channel.
+// If the context is canceled, it prints the error and cancels the context.
+// Otherwise, it sends the result to the channel and cancels the context.
+func getCepSub(ctx context.Context, cancel context.CancelFunc, ch chan string, url string, cep string) {
 	select {
 	case <-ctx.Done():
-		return nil, ctx.Err()
+		log.Println(ctx.Err())
 	default:
-		res, err := http.DefaultClient.Do(req)
+		res, err := getCep(ctx, url, cep)
 		if err != nil {
-			return nil, err
+			log.Println(err)
 		}
-		body, error := io.ReadAll(res.Body)
-		if error != nil {
-			return nil, error
-		}
-		var v brasilapi
-		error = json.Unmarshal(body, &v)
-		if error != nil {
-			return nil, error
-		}
-		return &v, nil
+		ch <- res
+		cancel()
 	}
 }
 
@@ -100,54 +112,27 @@ func main() {
 
 	cep := "39408078"
 
-	chViaCep := make(chan viacep)
+	chViaCep := make(chan string)
 	defer close(chViaCep)
 
-	chBrasilapi := make(chan brasilapi)
+	chBrasilapi := make(chan string)
 	defer close(chBrasilapi)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	go func(ctx context.Context, ch chan brasilapi) {
-
-		select {
-		case <-ctx.Done():
-			log.Println(ctx.Err())
-		default:
-			res, err := getCepFromBrasilapi(ctx, cep)
-			if err != nil {
-				log.Println(err)
-			}
-			ch <- *res
-			ctx.Done()
-		}
-	}(ctx, chBrasilapi)
-
-	go func(ctx context.Context, ch chan viacep) {
-
-		select {
-		case <-ctx.Done():
-			log.Println(ctx.Err())
-		default:
-			res, err := getCepFromViaCep(ctx, cep)
-			if err != nil {
-				log.Println(err)
-			}
-			ch <- *res
-			ctx.Done()
-		}
-	}(ctx, chViaCep)
+	go getCepSub(ctx, cancel, chViaCep, urlViacep, cep)
+	go getCepSub(ctx, cancel, chBrasilapi, urlBrasilapi, cep)
 
 	select {
 	case <-ctx.Done():
+		log.Println("Context deadline exceeded")
 		log.Println(ctx.Err())
-		return
 	case resBrasilapi := <-chBrasilapi:
 		log.Println("Return from Brasilapi")
-		json.NewEncoder(log.Writer()).Encode(resBrasilapi)
+		log.Println(resBrasilapi)
 	case resViaCep := <-chViaCep:
 		log.Println("Return from ViaCep")
-		json.NewEncoder(log.Writer()).Encode(resViaCep)
+		log.Println(resViaCep)
 	}
 }

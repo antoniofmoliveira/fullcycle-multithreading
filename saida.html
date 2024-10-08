@@ -1,17 +1,21 @@
 antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
-2024/10/08 07:16:29 Return from ViaCep
-{"cep":"39408-078","logradouro":"Avenida Herlindo Silveira","complemento":"até
+2024/10/08 08:10:51 Get "http://viacep.com.br/ws/39408078/json/": context canceled
+2024/10/08 08:10:51 Return from Brasilapi
+2024/10/08 08:10:51 {"cep":"39408078","state":"MG","city":"Montes Claros","neighborhood":"Ibituruna","street":"Avenida
+Herlindo Silveira","service":"open-cep"}
+antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
+2024/10/08 08:11:07 context deadline exceeded
+antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
+2024/10/08 08:11:15 Return from Brasilapi
+2024/10/08 08:11:15 {"cep":"39408078","state":"MG","city":"Montes Claros","neighborhood":"Ibituruna","street":"Avenida
+Herlindo Silveira","service":"open-cep"}
+antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
+2024/10/08 08:11:29 Return from Brasilapi
+2024/10/08 08:11:29 Get "http://viacep.com.br/ws/39408078/json/": context canceled
+2024/10/08 08:11:29 {"cep":"39408078","state":"MG","city":"Montes Claros","neighborhood":"Ibituruna","street":"Avenida
+Herlindo Silveira","service":"open-cep"}
+antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
+2024/10/08 08:13:07 Return from ViaCep
+2024/10/08 08:13:07 {"cep":"39408-078","logradouro":"Avenida Herlindo Silveira","complemento":"até
 499/500","unidade":"","bairro":"Ibituruna","localidade":"Montes Claros","uf":"MG","estado":"Minas
 Gerais","regiao":"Sudeste","ibge":"3143302","gia":"","ddd":"38","siafi":"4865"}
-antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
-2024/10/08 07:17:46 context deadline exceeded
-2024/10/08 07:17:46 Get "http://viacep.com.br/ws/39408078/json/": context deadline exceeded
-antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
-2024/10/08 07:17:55 Return from Brasilapi
-{"cep":"39408078","state":"MG","city":"Montes Claros","neighborhood":"Ibituruna","street":"Avenida Herlindo
-Silveira","service":"open-cep"}
-antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
-2024/10/08 07:18:08 Return from Brasilapi
-{"cep":"39408078","state":"MG","city":"Montes Claros","neighborhood":"Ibituruna","street":"Avenida Herlindo
-Silveira","service":"open-cep"}
-antonio@DG15:~/DEV/full-cycle/multithreading$
