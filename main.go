@@ -108,6 +108,10 @@ func getCepSub(ctx context.Context, cancel context.CancelFunc, ch chan string, u
 	}
 }
 
+// main performs two GET requests to the Brasilapi and ViaCep APIs, for the given cep.
+// It runs each request in a separate goroutine and waits for the first one to finish.
+// If the context is canceled, it logs the error and closes the channels.
+// Otherwise, it logs the result of the first request to finish and closes the channels.
 func main() {
 
 	cep := "39408078"
