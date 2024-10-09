@@ -2,91 +2,67 @@ package main
 
 import (
 	"context"
-	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 )
-
-type brasilapi struct {
-	Cep          string `json:"cep"`
-	State        string `json:"state"`
-	City         string `json:"city"`
-	Neighborhood string `json:"neighborhood"`
-	Street       string `json:"street"`
-	Service      string `json:"service"`
-}
-
-type viacep struct {
-	Cep         string `json:"cep"`
-	Logradouro  string `json:"logradouro"`
-	Complemento string `json:"complemento"`
-	Unidade     string `json:"unidade"`
-	Bairro      string `json:"bairro"`
-	Localidade  string `json:"localidade"`
-	Uf          string `json:"uf"`
-	Estado      string `json:"estado"`
-	Regiao      string `json:"regiao"`
-	Ibge        string `json:"ibge"`
-	Gia         string `json:"gia"`
-	Ddd         string `json:"ddd"`
-	Siafi       string `json:"siafi"`
-}
 
 const urlBrasilapi = "https://brasilapi.com.br/api/cep/v1/{{cep}}"
 const urlViacep = "http://viacep.com.br/ws/{{cep}}/json/"
 
-// getCep performs a GET request on the given url, replacing {{cep}} with the cep argument.
-// It returns the response body as a JSON string, or an error if one occurs.
-// The context is used to cancel the request if it takes longer than 1 second.
-func getCep(ctx context.Context, url string, cep string) (string, error) {
-	urlFinal := strings.Replace(url, "{{cep}}", cep, -1)
-
-	req, err := http.NewRequestWithContext(ctx, "GET", urlFinal, nil)
+// getCep performs a GET request to the given URL and returns the response body as a string.
+// If the request returns an error, it returns the error message.
+// If the request returns a status code different from 200, it returns an error message.
+// If the request returns a status code different from 200 and contains "erro" , it returns an error message saying the cep was not found.
+// If the request returns a status code of 400, it returns an error message saying the cep must have exactly 8 characters.
+// If the request returns a status code of 500, it returns an error message saying there was an internal server error.
+// If the request returns a status code of 408, it returns an error message saying the response time exceeded the limit.
+// If the request returns a status code of 404, it returns an error message saying the cep was not found.
+func getCep(ctx context.Context, url string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return "", err
 	}
 
 	select {
 	case <-ctx.Done():
+		log.Println(" context cancelado")
 		return "", ctx.Err()
 	default:
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
 			return "", err
 		}
+		if res.StatusCode == http.StatusInternalServerError {
+			return "", errors.New("erro interno do servidor")
+		}
+		if res.StatusCode == http.StatusBadRequest {
+			return "", errors.New("cep deve conter exatamente 8 caracteres")
+		}
+		if res.StatusCode == http.StatusRequestTimeout {
+			return "", errors.New("tempo de resposta excedido")
+		}
+		if res.StatusCode == http.StatusNotFound {
+			return "", errors.New("cep não encontrado")
+		}
+		if res.StatusCode != http.StatusOK {
+			return "", errors.New("erro ao buscar o CEP: " + res.Status)
+		}
 		body, error := io.ReadAll(res.Body)
 		if error != nil {
-			return "", error
+			return "", errors.New("erro ao ler o corpo da resposta: " + error.Error())
 		}
-		if strings.Contains(url, "viacep") {
-			var v viacep
-			error = json.Unmarshal(body, &v)
-			if error != nil {
-				return "", error
-			}
-			jsonString, err := json.Marshal(v)
-			if err != nil {
-				return "", err
-			}
-			return string(jsonString), nil
-		} else if strings.Contains(url, "brasilapi") {
-			var v brasilapi
-			error = json.Unmarshal(body, &v)
-			if error != nil {
-				return "", error
-			}
-			jsonString, err := json.Marshal(v)
-			if err != nil {
-				return "", err
-			}
-			return string(jsonString), nil
-		} else {
-			return "", err
+		if strings.Contains(string(body), "erro") {
+			return "", errors.New("cep não encontrado")
 		}
 
+		return string(body), nil
 	}
 
 }
@@ -94,27 +70,42 @@ func getCep(ctx context.Context, url string, cep string) (string, error) {
 // getCepSub runs getCep in a separate goroutine and sends the result to the given channel.
 // If the context is canceled, it prints the error and cancels the context.
 // Otherwise, it sends the result to the channel and cancels the context.
-func getCepSub(ctx context.Context, cancel context.CancelFunc, ch chan string, url string, cep string) {
+func getCepSub(ctx context.Context, cancel context.CancelFunc, ch chan string, url string) {
 	select {
 	case <-ctx.Done():
-		log.Println(ctx.Err())
+		ch <- ctx.Err().Error()
 	default:
-		res, err := getCep(ctx, url, cep)
+		res, err := getCep(ctx, url)
 		if err != nil {
-			log.Println(err)
+			ch <- err.Error()
+			return
 		}
 		ch <- res
 		cancel()
 	}
 }
 
-// main performs two GET requests to the Brasilapi and ViaCep APIs, for the given cep.
-// It runs each request in a separate goroutine and waits for the first one to finish.
-// If the context is canceled, it logs the error and closes the channels.
-// Otherwise, it logs the result of the first request to finish and closes the channels.
+// main performs a GET request on the given cep using both Brasilapi and ViaCEP, and prints the result of the first one to finish.
+// It uses a context to cancel the requests if they take longer than 1 second.
+// It also captures SIGINT, SIGTERM, and SIGHUP to cancel the execution and print a message.
+// It closes the channels used to communicate with the goroutines.
+// It logs the error if the context is canceled or if the requests return an error.
+// It prints the result of the request if it's successful.
 func main() {
 
-	cep := "39408078"
+	if len(os.Args) != 2 {
+		log.Fatal("Usage: go run main.go <cep>")
+	}
+
+	termChan := make(chan os.Signal, 1)
+	signal.Notify(termChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+	go func() {
+		<-termChan
+		log.Println("execução cancelada")
+		os.Exit(0)
+	}()
+
+	cep := os.Args[1]
 
 	chViaCep := make(chan string)
 	defer close(chViaCep)
@@ -125,8 +116,8 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	go getCepSub(ctx, cancel, chViaCep, urlViacep, cep)
-	go getCepSub(ctx, cancel, chBrasilapi, urlBrasilapi, cep)
+	go getCepSub(ctx, cancel, chViaCep, strings.Replace(urlViacep, "{{cep}}", cep, -1))
+	go getCepSub(ctx, cancel, chBrasilapi, strings.Replace(urlBrasilapi, "{{cep}}", cep, -1))
 
 	select {
 	case <-ctx.Done():

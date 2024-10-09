@@ -1,21 +1,35 @@
-antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
-2024/10/08 08:10:51 Get "http://viacep.com.br/ws/39408078/json/": context canceled
-2024/10/08 08:10:51 Return from Brasilapi
-2024/10/08 08:10:51 {"cep":"39408078","state":"MG","city":"Montes Claros","neighborhood":"Ibituruna","street":"Avenida
-Herlindo Silveira","service":"open-cep"}
-antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
-2024/10/08 08:11:07 context deadline exceeded
-antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
-2024/10/08 08:11:15 Return from Brasilapi
-2024/10/08 08:11:15 {"cep":"39408078","state":"MG","city":"Montes Claros","neighborhood":"Ibituruna","street":"Avenida
-Herlindo Silveira","service":"open-cep"}
-antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
-2024/10/08 08:11:29 Return from Brasilapi
-2024/10/08 08:11:29 Get "http://viacep.com.br/ws/39408078/json/": context canceled
-2024/10/08 08:11:29 {"cep":"39408078","state":"MG","city":"Montes Claros","neighborhood":"Ibituruna","street":"Avenida
-Herlindo Silveira","service":"open-cep"}
-antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
-2024/10/08 08:13:07 Return from ViaCep
-2024/10/08 08:13:07 {"cep":"39408-078","logradouro":"Avenida Herlindo Silveira","complemento":"até
-499/500","unidade":"","bairro":"Ibituruna","localidade":"Montes Claros","uf":"MG","estado":"Minas
-Gerais","regiao":"Sudeste","ibge":"3143302","gia":"","ddd":"38","siafi":"4865"}
+<p>antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go</p>
+<p>2024/10/09 09:37:59 Usage: go run main.go &lt;cep&gt;</p>
+<p>exit status 1</p>
+<p>antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 3940807</>
+<p>2024/10/09 09:38:12 Return from ViaCep</p>
+<p>2024/10/09 09:38:12 cep deve conter exatamente 8 caracteres</p>
+<p>antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 394080788</p>
+<p>2024/10/09 09:38:17 Return from Brasilapi</p>
+<p>2024/10/09 09:38:17 cep deve conter exatamente 8 caracteres</p>
+<p>antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408079</p>
+<p>2024/10/09 09:38:25 Return from Brasilapi</p>
+<p>2024/10/09 09:38:25 cep não encontrado</p>
+<p>antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078</p>
+<p>2024/10/09 09:38:30 Return from Brasilapi</p>
+<p>2024/10/09 09:38:30 {"cep":"39408078","state":"MG","city":"Montes
+<p>Claros","neighborhood":"Ibituruna","street":"Avenida Herlindo Silveira","service":"open-cep"}</p>
+<p>antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078
+<p>2024/10/09 09:52:53 Return from ViaCep</p>
+<p>2024/10/09 09:52:53 {</p>
+<p> "cep": "39408-078",</p>
+<p> "logradouro": "Avenida Herlindo Silveira",</p>
+<p> "complemento": "até 499/500",</p>
+<p> "unidade": "",</p>
+<p> "bairro": "Ibituruna",</p>
+<p> "localidade": "Montes Claros",</p>
+<p> "uf": "MG",</p>
+<p> "estado": "Minas Gerais",</p>
+<p> "regiao": "Sudeste",</p>
+<p> "ibge": "3143302",</p>
+<p> "gia": "",</p>
+<p> "ddd": "38",</p>
+<p> "siafi": "4865"</p>
+<p>}</p>
+<p>antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078</p>
+<p>^C2024/10/09 09:47:26 execução cancelada</p>
