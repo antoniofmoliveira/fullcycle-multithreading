@@ -16,14 +16,11 @@ import (
 const urlBrasilapi = "https://brasilapi.com.br/api/cep/v1/{{cep}}"
 const urlViacep = "http://viacep.com.br/ws/{{cep}}/json/"
 
-// getCep performs a GET request to the given URL and returns the response body as a string.
-// If the request returns an error, it returns the error message.
-// If the request returns a status code different from 200, it returns an error message.
-// If the request returns a status code different from 200 and contains "erro" , it returns an error message saying the cep was not found.
-// If the request returns a status code of 400, it returns an error message saying the cep must have exactly 8 characters.
-// If the request returns a status code of 500, it returns an error message saying there was an internal server error.
-// If the request returns a status code of 408, it returns an error message saying the response time exceeded the limit.
-// If the request returns a status code of 404, it returns an error message saying the cep was not found.
+
+// getCep performs a GET request to the given url, respecting the given context.
+// It returns the response body as a string, or an error if the context is canceled or if the request returns an error.
+// It also checks the response status, and returns an error if the status is not 200.
+// The error message is based on the status code and the response body.
 func getCep(ctx context.Context, url string) (string, error) {
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -32,39 +29,37 @@ func getCep(ctx context.Context, url string) (string, error) {
 
 	select {
 	case <-ctx.Done():
-		log.Println(" context cancelado")
+		log.Println("context cancelado")
 		return "", ctx.Err()
 	default:
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
 			return "", err
 		}
-		if res.StatusCode == http.StatusInternalServerError {
-			return "", errors.New("erro interno do servidor")
-		}
-		if res.StatusCode == http.StatusBadRequest {
-			return "", errors.New("cep deve conter exatamente 8 caracteres")
-		}
-		if res.StatusCode == http.StatusRequestTimeout {
+		switch res.StatusCode {
+		case http.StatusOK:
+			body, error := io.ReadAll(res.Body)
+			if error != nil {
+				return "", errors.New("erro ao ler o corpo da resposta: " + error.Error())
+			}
+			if strings.Contains(string(body), "erro") {
+				return "", errors.New("cep não encontrado")
+			}
+			return string(body), nil
+		case http.StatusRequestTimeout:
 			return "", errors.New("tempo de resposta excedido")
-		}
-		if res.StatusCode == http.StatusNotFound {
+		case http.StatusNotFound:
 			return "", errors.New("cep não encontrado")
-		}
-		if res.StatusCode != http.StatusOK {
+		case http.StatusBadRequest:
+			return "", errors.New("cep deve conter exatamente 8 caracteres")
+		case http.StatusInternalServerError:
+			return "", errors.New("erro interno do servidor")
+		case http.StatusServiceUnavailable:
+			return "", errors.New("serviço indisponível")
+		default:
 			return "", errors.New("erro ao buscar o CEP: " + res.Status)
 		}
-		body, error := io.ReadAll(res.Body)
-		if error != nil {
-			return "", errors.New("erro ao ler o corpo da resposta: " + error.Error())
-		}
-		if strings.Contains(string(body), "erro") {
-			return "", errors.New("cep não encontrado")
-		}
-
-		return string(body), nil
 	}
-
 }
 
 // getCepSub runs getCep in a separate goroutine and sends the result to the given channel.
