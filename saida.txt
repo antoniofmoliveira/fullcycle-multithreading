@@ -1,0 +1,35 @@
+antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
+2024/10/09 09:37:59 Usage: go run main.go &lt;cep&gt;
+exit status 1
+antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 3940807</>
+2024/10/09 09:38:12 Return from ViaCep
+2024/10/09 09:38:12 cep deve conter exatamente 8 caracteres
+antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 394080788
+2024/10/09 09:38:17 Return from Brasilapi
+2024/10/09 09:38:17 cep deve conter exatamente 8 caracteres
+antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408079
+2024/10/09 09:38:25 Return from Brasilapi
+2024/10/09 09:38:25 cep não encontrado
+antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078
+2024/10/09 09:38:30 Return from Brasilapi
+2024/10/09 09:38:30 {"cep":"39408078","state":"MG","city":"Montes
+Claros","neighborhood":"Ibituruna","street":"Avenida Herlindo Silveira","service":"open-cep"}
+antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078
+2024/10/09 09:52:53 Return from ViaCep
+2024/10/09 09:52:53 {
+ "cep": "39408-078",
+ "logradouro": "Avenida Herlindo Silveira",
+ "complemento": "até 499/500",
+ "unidade": "",
+ "bairro": "Ibituruna",
+ "localidade": "Montes Claros",
+ "uf": "MG",
+ "estado": "Minas Gerais",
+ "regiao": "Sudeste",
+ "ibge": "3143302",
+ "gia": "",
+ "ddd": "38",
+ "siafi": "4865"
+}
+antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078
+^C2024/10/09 09:47:26 execução cancelada
