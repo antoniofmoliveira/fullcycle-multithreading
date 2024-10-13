@@ -29,7 +29,7 @@ func getCep(ctx context.Context, url string) (string, error) {
 
 	select {
 	case <-ctx.Done():
-		log.Println("context cancelado")
+		log.Println("canceled context")
 		return "", ctx.Err()
 	default:
 		res, err := http.DefaultClient.Do(req)
@@ -40,24 +40,24 @@ func getCep(ctx context.Context, url string) (string, error) {
 		case http.StatusOK:
 			body, error := io.ReadAll(res.Body)
 			if error != nil {
-				return "", errors.New("erro ao ler o corpo da resposta: " + error.Error())
+				return "", errors.New("fail to read the body response: " + error.Error())
 			}
 			if strings.Contains(string(body), "erro") {
-				return "", errors.New("cep não encontrado")
+				return "", errors.New("not found")
 			}
 			return string(body), nil
 		case http.StatusRequestTimeout:
-			return "", errors.New("tempo de resposta excedido")
+			return "", errors.New("time exceeded")
 		case http.StatusNotFound:
-			return "", errors.New("cep não encontrado")
+			return "", errors.New("not found")
 		case http.StatusBadRequest:
-			return "", errors.New("cep deve conter exatamente 8 caracteres")
+			return "", errors.New("cep must have 8 digits")
 		case http.StatusInternalServerError:
-			return "", errors.New("erro interno do servidor")
+			return "", errors.New("internal server error")
 		case http.StatusServiceUnavailable:
-			return "", errors.New("serviço indisponível")
+			return "", errors.New("service unavailable")
 		default:
-			return "", errors.New("erro ao buscar o CEP: " + res.Status)
+			return "", errors.New("fail to get CEP: " + res.Status)
 		}
 	}
 }
@@ -94,9 +94,14 @@ func main() {
 
 	termChan := make(chan os.Signal, 1)
 	signal.Notify(termChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
+
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
 	go func() {
 		<-termChan
-		log.Println("execução cancelada")
+        cancel()
+		log.Println("canceling query")
 		os.Exit(0)
 	}()
 
@@ -107,9 +112,6 @@ func main() {
 
 	chBrasilapi := make(chan string)
 	defer close(chBrasilapi)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
 
 	go getCepSub(ctx, cancel, chViaCep, strings.Replace(urlViacep, "{{cep}}", cep, -1))
 	go getCepSub(ctx, cancel, chBrasilapi, strings.Replace(urlBrasilapi, "{{cep}}", cep, -1))

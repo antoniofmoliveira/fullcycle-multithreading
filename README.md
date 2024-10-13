@@ -150,13 +150,13 @@ antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
 exit status 1
 antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 3940807</>
 2024/10/09 09:38:12 Return from ViaCep
-2024/10/09 09:38:12 cep deve conter exatamente 8 caracteres
+2024/10/09 09:38:12 cep must have 8 digits
 antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 394080788
 2024/10/09 09:38:17 Return from Brasilapi
-2024/10/09 09:38:17 cep deve conter exatamente 8 caracteres
+2024/10/09 09:38:17 cep must have 8 digits
 antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408079
 2024/10/09 09:38:25 Return from Brasilapi
-2024/10/09 09:38:25 cep não encontrado
+2024/10/09 09:38:25 not found
 antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078
 2024/10/09 09:38:30 Return from Brasilapi
 2024/10/09 09:38:30 {"cep":"39408078","state":"MG","city":"Montes
@@ -179,5 +179,5 @@ antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078
  "siafi": "4865"
 }
 antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078
-^C2024/10/09 09:47:26 execução cancelada
+^C2024/10/09 09:47:26 canceling query
 ```
