@@ -23,6 +23,9 @@ type Viacep struct {
 	Siafi       string `json:"siafi"`
 }
 
+// NewViacep creates a new Viacep instance and validates it.
+// It returns an error if the validation fails.
+//
 func NewViacep(cep string, logradouro string, complemento string, unidade string, bairro string, localidade string, uf string, estado string, regiao string, ibge string, gia string, ddd string, siafi string) (*Viacep, error) {
 	v := &Viacep{
 		Cep:         cep,
@@ -46,6 +49,8 @@ func NewViacep(cep string, logradouro string, complemento string, unidade string
 	return v, nil
 }
 
+// NewViacepFromJson creates a new Viacep instance from a JSON string and validates it.
+// It returns the created Viacep instance or an error if the JSON is invalid or validation fails.
 func NewViacepFromJson(jsonString string) (*Viacep, error) {
 	var v Viacep
 	err := json.Unmarshal([]byte(jsonString), &v)
@@ -59,6 +64,9 @@ func NewViacepFromJson(jsonString string) (*Viacep, error) {
 	return &v, nil
 }
 
+// Validate validates the Viacep fields and returns an error if any of them are invalid.
+// It checks if the cep is valid, uf is a valid short state name, estado is a valid long state name,
+// regiao is a valid region, localidade, bairro and logradouro are not empty.
 func (v *Viacep) Validate() error {
 	if _, err := shared.ValidateCepWithDash(v.Cep); err != nil {
 		return err

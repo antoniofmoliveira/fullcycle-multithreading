@@ -12,6 +12,9 @@ import (
 	"github.com/antoniofmoliveira/fullcycle-multithreading/internal/usecase"
 )
 
+// main sets up the logging configuration and parses the command-line argument for the CEP.
+// It initializes a context with a timeout of 1 second and sets up signal handling for SIGINT, SIGTERM, and SIGHUP to cancel the ongoing query.
+// It executes the queries using the ExecuteQueries function from the usecase package and logs the result.
 func main() {
 
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))

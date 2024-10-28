@@ -195,6 +195,17 @@ antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078
 ```bash
 $ make newversion
 go run cmd/main.go -cep 39408078
-{"time":"2024-10-28T10:40:31.764210966-03:00","level":"INFO","msg":"Return from Brasilapi","cep":{"cep":"39408078","state":"MG","city":"Montes Claros","neighborhood":"Ibituruna","street":"Avenida Herlindo Silveira"}}
-{"time":"2024-10-28T10:40:26.778225526-03:00","level":"INFO","msg":"Viacep: canceled context"}
+{"time":"2024-10-28T11:51:08.103415713-03:00","level":"INFO","msg":"ExecuteQueries: Context deadline exceeded"}
+{"time":"2024-10-28T11:51:08.134042302-03:00","level":"INFO","msg":"Brasilapi: canceled context"}
+{"time":"2024-10-28T11:51:08.214412032-03:00","level":"INFO","msg":"Viacep: canceled context"}
+
+$ make newversion
+go run cmd/main.go -cep 39408078
+{"time":"2024-10-28T11:51:18.111387716-03:00","level":"INFO","msg":"Return from Brasilapi","cep":{"cep":"39408078","state":"MG","city":"Montes Claros","neighborhood":"Ibituruna","street":"Avenida Herlindo Silveira"}}
+{"time":"2024-10-28T11:51:18.821722504-03:00","level":"INFO","msg":"Viacep: canceled context"}
+
+$ make newversion
+go run cmd/main.go -cep 39408078
+{"time":"2024-10-28T11:51:35.623727625-03:00","level":"INFO","msg":"Return from Viacep","cep":{"cep":"39408-078","state":"MG","city":"Montes Claros","neighborhood":"Ibituruna","street":"Avenida Herlindo Silveira"}}
+{"time":"2024-10-28T11:51:35.696273638-03:00","level":"INFO","msg":"Brasilapi: canceled context"}
 ```

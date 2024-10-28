@@ -19,6 +19,13 @@ type Brasilapi struct {
 	Service      string `json:"service"`
 }
 
+// NewBrasilapi creates a new Brasilapi instance and validates it.
+// It returns an error if the validation fails.
+//
+// cep must be a valid brazilian cep.
+// state must be a valid short state name.
+// service must be one of the allowed services.
+// city, neighborhood and street must not be empty.
 func NewBrasilapi(cep, state, city, neighborhood, street, service string) (*Brasilapi, error) {
 
 	b := &Brasilapi{
@@ -37,6 +44,8 @@ func NewBrasilapi(cep, state, city, neighborhood, street, service string) (*Bras
 	return b, nil
 }
 
+// NewBrasilapiFromJson creates a new Brasilapi instance from a JSON string and validates it.
+// It returns the created Brasilapi instance or an error if the JSON is invalid or validation fails.
 func NewBrasilapiFromJson(jsonString string) (*Brasilapi, error) {
 	var b Brasilapi
 	err := json.Unmarshal([]byte(jsonString), &b)
@@ -50,6 +59,10 @@ func NewBrasilapiFromJson(jsonString string) (*Brasilapi, error) {
 	return &b, nil
 }
 
+// Validate checks the fields of the Brasilapi struct for validity.
+// It verifies that the cep is valid, the state is a recognized short state name,
+// the service is one of the allowed services, and that the city, neighborhood,
+// and street fields are not empty. If any validation fails, it returns an error.
 func (b *Brasilapi) Validate() error {
 	if _, err := shared.ValidateCepWithoutDash(b.Cep); err != nil {
 		return err
