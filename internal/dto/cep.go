@@ -3,6 +3,7 @@ package dto
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 
 	"github.com/antoniofmoliveira/fullcycle-multithreading/internal/shared"
 )
@@ -51,4 +52,14 @@ func (c *Cep) Validate() error {
 		return errors.New("city, neighborhood and street must not be empty")
 	}
 	return nil
+}
+
+func (c *Cep) LogValue() slog.Value {
+	return slog.GroupValue(
+		slog.String("cep", c.Cep),
+		slog.String("street", c.Street),
+		slog.String("neighborhood", c.Neighborhood),
+		slog.String("city", c.City),
+		slog.String("state", c.State),
+	)
 }

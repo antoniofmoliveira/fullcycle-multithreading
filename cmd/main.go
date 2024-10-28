@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -15,6 +14,9 @@ import (
 )
 
 func main() {
+
+	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	slog.SetDefault(l)
 
 	cep := flag.String("cep", "", "CEP")
 	flag.Parse()
@@ -32,7 +34,7 @@ func main() {
 	go func() {
 		<-termChan
 		cancel()
-		log.Println("canceling query")
+		slog.Info("canceling query")
 		os.Exit(0)
 	}()
 

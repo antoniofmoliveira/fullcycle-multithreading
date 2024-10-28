@@ -17,6 +17,7 @@ type CepQuery struct {
 	Context            context.Context
 	Cancel             context.CancelFunc
 	Cep                string
+	ServiceName        string
 	Channel            chan dto.Response
 	url                string
 	ExtractCepFromBody func(c *CepQuery, body []byte) (dto.Cep, bool)
@@ -31,7 +32,7 @@ func (c *CepQuery) GetCep() {
 	}
 	select {
 	case <-c.Context.Done():
-		slog.Info("Viacep: canceled context")
+		slog.Info(c.ServiceName + ": canceled context")
 		return
 	default:
 		executeQuery(req, c)

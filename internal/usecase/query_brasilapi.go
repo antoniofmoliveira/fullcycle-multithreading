@@ -24,11 +24,12 @@ func BrasilapiExtractCepFromBody(c *CepQuery, body []byte) (dto.Cep, bool) {
 
 func NewQueryBrasilapi(ctx context.Context, cancel context.CancelFunc, cep string) *CepQuery {
 	q := &CepQuery{
-		Context: ctx,
-		Cancel:  cancel,
-		Cep:     cep,
-		Channel: make(chan dto.Response),
-		url:     "https://brasilapi.com.br/api/cep/v1/{{cep}}",
+		Context:     ctx,
+		Cancel:      cancel,
+		Cep:         cep,
+		Channel:     make(chan dto.Response),
+		url:         "https://brasilapi.com.br/api/cep/v1/{{cep}}",
+		ServiceName: "Brasilapi",
 	}
 	q.ExtractCepFromBody = BrasilapiExtractCepFromBody
 	return q

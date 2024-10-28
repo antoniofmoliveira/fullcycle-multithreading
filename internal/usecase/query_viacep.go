@@ -24,11 +24,12 @@ func ViacepExtractCepFromBody(c *CepQuery, body []byte) (dto.Cep, bool) {
 
 func NewCepQueryViacep(ctx context.Context, cancel context.CancelFunc, cep string) *CepQuery {
 	q := &CepQuery{
-		Context: ctx,
-		Cancel:  cancel,
-		Cep:     cep,
-		Channel: make(chan dto.Response),
-		url:     "http://viacep.com.br/ws/{{cep}}/json/",
+		Context:     ctx,
+		Cancel:      cancel,
+		Cep:         cep,
+		Channel:     make(chan dto.Response),
+		url:         "http://viacep.com.br/ws/{{cep}}/json/",
+		ServiceName: "Viacep",
 	}
 	q.ExtractCepFromBody = ViacepExtractCepFromBody
 	return q
