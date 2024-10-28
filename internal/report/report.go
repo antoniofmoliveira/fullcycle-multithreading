@@ -7,6 +7,5 @@ import (
 )
 
 func Report(cep dto.Cep, service string) {
-	slog.Info("Return from " + service)
-	slog.Info("result", "cep", cep)
+	slog.Info("Return from "+service, "cep", cep)
 }

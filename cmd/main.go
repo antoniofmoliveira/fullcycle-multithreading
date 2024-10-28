@@ -9,18 +9,15 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/antoniofmoliveira/fullcycle-multithreading/internal/report"
 	"github.com/antoniofmoliveira/fullcycle-multithreading/internal/usecase"
 )
 
 func main() {
 
-	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	slog.SetDefault(l)
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 
 	cep := flag.String("cep", "", "CEP")
 	flag.Parse()
-
 	if *cep == "" {
 		flag.PrintDefaults()
 		return
@@ -38,20 +35,7 @@ func main() {
 		os.Exit(0)
 	}()
 
-	q0 := usecase.NewQueryBrasilapi(ctx, cancel, *cep)
-	q1 := usecase.NewCepQueryViacep(ctx, cancel, *cep)
-
-	go q0.GetCep()
-	go q1.GetCep()
-
-	select {
-	case <-ctx.Done():
-		slog.Info("main: Context deadline exceeded")
-	case resBrasilapi := <-q0.Channel:
-		report.Report(resBrasilapi.Cep, "Brasilapi")
-	case resViaCep := <-q1.Channel:
-		report.Report(resViaCep.Cep, "ViaCep")
-	}
+	usecase.ExecuteQueries(ctx, cancel, cep)
 
 	time.Sleep(time.Second)
 

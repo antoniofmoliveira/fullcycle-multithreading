@@ -195,7 +195,6 @@ antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078
 ```bash
 $ make newversion
 go run cmd/main.go -cep 39408078
-2024/10/28 06:36:47 INFO Return from Brasilapi
-2024/10/28 06:36:47 INFO {39408078 MG Montes Claros Ibituruna Avenida Herlindo Silveira}
-2024/10/28 06:36:48 INFO Viacep: canceled context
+{"time":"2024-10-28T10:40:31.764210966-03:00","level":"INFO","msg":"Return from Brasilapi","cep":{"cep":"39408078","state":"MG","city":"Montes Claros","neighborhood":"Ibituruna","street":"Avenida Herlindo Silveira"}}
+{"time":"2024-10-28T10:40:26.778225526-03:00","level":"INFO","msg":"Viacep: canceled context"}
 ```
