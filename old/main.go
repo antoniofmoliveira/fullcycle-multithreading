@@ -16,7 +16,6 @@ import (
 const urlBrasilapi = "https://brasilapi.com.br/api/cep/v1/{{cep}}"
 const urlViacep = "http://viacep.com.br/ws/{{cep}}/json/"
 
-
 // getCep performs a GET request to the given url, respecting the given context.
 // It returns the response body as a string, or an error if the context is canceled or if the request returns an error.
 // It also checks the response status, and returns an error if the status is not 200.
@@ -95,12 +94,12 @@ func main() {
 	termChan := make(chan os.Signal, 1)
 	signal.Notify(termChan, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 
-    ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	go func() {
 		<-termChan
-        cancel()
+		cancel()
 		log.Println("canceling query")
 		os.Exit(0)
 	}()

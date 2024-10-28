@@ -4,9 +4,9 @@
 
 As duas requisições serão feitas simultaneamente para as seguintes APIs:
 
-- https://brasilapi.com.br/api/cep/v1/ + cep
+- `https://brasilapi.com.br/api/cep/v1/ + cep`
 
-- http://viacep.com.br/ws/" + cep + "/json/
+- `http://viacep.com.br/ws/ + cep + /json/`
 
 Os requisitos para este desafio são:
 
@@ -16,7 +16,7 @@ Os requisitos para este desafio são:
 
 - Limitar o tempo de resposta em 1 segundo. Caso contrário, o erro de timeout deve ser exibido.
 
-## arquivos:
+## arquivos
 
 - `brasilapi.200.json` - resposta status 200 da brasilapi
 
@@ -142,7 +142,7 @@ Os requisitos para este desafio são:
 </html>
 ```
 
-- `saida.txt` - cópia da saída do terminal para várias execuções da rotina
+- `saida.txt` - cópia da saída do terminal para várias execuções da rotina na versão antiga
 
 ```shell
 antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go
@@ -180,4 +180,22 @@ antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078
 }
 antonio@DG15:~/DEV/full-cycle/multithreading$ go run main.go 39408078
 ^C2024/10/09 09:47:26 canceling query
+```
+
+## nova versão
+
+- clean architecture
+
+- tests
+
+- padronização de saída
+
+- saída de tela da nova versão
+
+```bash
+$ make newversion
+go run cmd/main.go -cep 39408078
+2024/10/28 06:36:47 INFO Return from Brasilapi
+2024/10/28 06:36:47 INFO {39408078 MG Montes Claros Ibituruna Avenida Herlindo Silveira}
+2024/10/28 06:36:48 INFO Viacep: canceled context
 ```
